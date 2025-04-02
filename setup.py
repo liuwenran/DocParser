@@ -23,7 +23,6 @@ setup(
         "setuptools==68.0.0",
         "tqdm==4.66.1",
         "sphinx",
-        "arxiv-cleaner",
         "texsoup",
     ],
     python_requires=">=3.8",

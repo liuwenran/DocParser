@@ -184,3 +184,5 @@ TexSoup/tests/
 
 data/
 data/discpline_info.csv
+examples/
+arxiv_source/data_info/
