@@ -93,11 +93,11 @@ def convert_pdf_figure_to_png_image(
     """
     # Crop PDF
     subprocess.run(
-        ["pdfcrop", str(pdf_image), str(pdf_image)], stdout=subprocess.DEVNULL
+        ["pdfcrop", '--gscmd /usr/bin/gs', str(pdf_image), str(pdf_image)], stdout=subprocess.DEVNULL
     )
 
     # Convert to PNG
-    images = pdf2image.convert_from_path(pdf_image, dpi=dpi)
+    images = pdf2image.convert_from_path(pdf_image, dpi=dpi, poppler_path="/usr/bin")
     images[0].save(png_image)
 
 

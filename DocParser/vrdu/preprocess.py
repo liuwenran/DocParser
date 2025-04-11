@@ -25,7 +25,7 @@ def remove_comments(tex_file: Path) -> None:
     tex_file.write_text(content)
 
 
-def clean_tex(tex_file: Path) -> None:
+def clean_tex(tex_file: Path, output_root_path: Path) -> None:
     """
     Clean the given TeX file using arxiv-cleaner.
 
@@ -35,10 +35,14 @@ def clean_tex(tex_file: Path) -> None:
     tex_file = Path(tex_file)
     main_directory = tex_file.parent
 
+    output_dir = output_root_path / str(tex_file).split('/')[-2]
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
+
     # Create and run the cleaner
     cleaner = Cleaner(
         input_dir=str(main_directory),
-        output_dir=str(main_directory),
+        output_dir=str(output_dir),
         tex=tex_file.name,
         command_options=config.command_options,
         verbose=False,
@@ -154,7 +158,7 @@ def delete_table_of_contents(tex_file: Path) -> None:
     tex_file.write_text(content)
 
 
-def run(tex_file: Path) -> None:
+def run(tex_file: Path, output_root_path: Path) -> None:
     """
     Preprocess a LaTeX document by:
     1. Cleaning with arxiv_cleaner
@@ -164,6 +168,21 @@ def run(tex_file: Path) -> None:
     Args:
         tex_file: Path to the LaTeX document
     """
-    clean_tex(tex_file)
+    clean_tex(tex_file, output_root_path=output_root_path)
+    import ipdb;ipdb.set_trace();
     replace_pdf_ps_figures_with_png(tex_file)
+    delete_table_of_contents(tex_file)
+
+
+def run_dataset_prepare(tex_file: Path, output_root_path: Path) -> None:
+    """
+    Preprocess a LaTeX document by:
+    1. Cleaning with arxiv_cleaner
+    2. Converting figures to PNG format
+    3. Removing table of contents
+
+    Args:
+        tex_file: Path to the LaTeX document
+    """
+    clean_tex(tex_file, output_root_path=output_root_path)
     delete_table_of_contents(tex_file)

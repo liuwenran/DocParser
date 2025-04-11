@@ -185,4 +185,10 @@ TexSoup/tests/
 data/
 data/discpline_info.csv
 examples/
+examples_output/
 arxiv_source/data_info/
+arxiv_source/our_data_info/
+paper_parse_result/
+paper_parse_result_single_tex/
+paper_parse_result_our_data/
+paper_parse_result_our_data_single_tex/

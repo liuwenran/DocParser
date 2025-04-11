@@ -84,7 +84,7 @@ def check_if_already_processed(main_directory: Path) -> bool:
     return quality_report_file.exists()
 
 
-def process_one_file(file_name: Path) -> None:
+def process_one_file(file_name: Path, output_root_path: Path=None) -> None:
     """
     Process a file through multiple steps including preprocessing, rendering,
     transforming into images, generating annotations, and handling exceptions.
@@ -120,14 +120,20 @@ def process_one_file(file_name: Path) -> None:
         os.chdir(main_directory)
         # create output folder and output/result folder
         result_dir = output_directory / "result"
-        result_dir.mkdir(parents=True)
+        result_dir.mkdir(parents=True, exist_ok=True)
+
+        import ipdb;ipdb.set_trace();
 
         # step 1: preprocess the paper
-        preprocess.run(original_tex)
+        preprocess.run(original_tex, output_root_path)
+
+        import ipdb;ipdb.set_trace();
 
         # step 2.1: run rendering
         vrdu_renderer = renderer.Renderer()
         vrdu_renderer.render(original_tex)
+
+        import ipdb;ipdb.set_trace();
 
         # step 2.2: compiling tex into PDFs
         logger.info(
@@ -201,8 +207,16 @@ def main() -> None:
         required=True,
         help="The path to the TeX file to process",
     )
+
+    parser.add_argument(
+        "--output_root_path",
+        type=Path,
+        help="output root path",
+        default="/home/liuwenran/cpfs01_liuwenran/forks/DocParser/paper_parse_result/"
+    )
     args = parser.parse_args()
-    process_one_file(Path(args.file_name))
+    
+    process_one_file(Path(args.file_name), Path(args.output_root_path))
 
 
 if __name__ == "__main__":

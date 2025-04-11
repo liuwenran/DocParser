@@ -2,7 +2,7 @@ import shlex
 import subprocess
 
 
-def run_command(command, stdout=None, stderr=None, cwd=None):
+def run_command(command, stdout=None, stderr=None, cwd=None, timeout=60):
     # Split the command into a sequence of arguments
     args = shlex.split(command)
 
@@ -11,8 +11,8 @@ def run_command(command, stdout=None, stderr=None, cwd=None):
         p_obj = subprocess.Popen(
             args, stdout=stdout, stderr=stderr, cwd=cwd)
 
-        # Wait the process to finish
-        p_obj.wait()
+        # 使用 communicate() 替代 wait()，支持超时
+        stdout_result, stderr_result = p_obj.communicate(timeout=timeout)
 
         # Read return code
         return_code = p_obj.returncode
@@ -34,14 +34,28 @@ def run_command(command, stdout=None, stderr=None, cwd=None):
 
         # Return the return code, stdout and stderr
         return return_code, stdout_result, stderr_result
+
+    except subprocess.TimeoutExpired as e:
+        # 超时后终止进程
+        p_obj.kill()
+        stdout_result = decode_output(e.stdout)
+        stderr_result = decode_output(e.stderr)
+        message = (
+            f'Command "{command}" timed out after {timeout} seconds\n'
+            f'STDOUT=>\n{stdout_result}\n'
+            f'STDERR=>\n{stderr_result}'
+        )
+        raise ValueError(message) from e
     except subprocess.CalledProcessError as e:
-        message = ('Could not run the command "{}"'.format(command) +
-                   'RETURN_CODE: {}'.format(e.returncode) +
-                   'STDOUT=>\n{}'.format(decode_output(e.stdout)) +
-                   'STDERR=>\n{}'.format(decode_output(e.stderr)))
-        raise ValueError(message)
-    except:
-        raise ValueError('Unknown error occurred')
+        message = (
+            f'Could not run the command "{command}"\n'
+            f'RETURN_CODE: {e.returncode}\n'
+            f'STDOUT=>\n{decode_output(e.stdout)}\n'
+            f'STDERR=>\n{decode_output(e.stderr)}'
+        )
+        raise ValueError(message) from e
+    except Exception as e:
+        raise ValueError(f'Unknown error occurred: {str(e)}')
 
 
 def check_command_results(command, return_code, stdout, stderr):
